@@ -1,0 +1,20 @@
+from pymongo import MongoClient
+import json
+from bson import BSON
+
+client = MongoClient('127.0.0.1', 27017)
+db = client["vacancies_db"]
+collection = db.collection
+
+with open('proffies.json') as json_file:
+    data = json.load(json_file)
+
+salary_min = input("Input min salary: ")
+def to_mongo(data, salary_min):
+    collection.insert_many(data)
+    for col in collection.find({"salary_min": {"$gte": salary_min }, "salary_max": {"$gte": salary_min }},{'_id': 0, "link":0, "currency":0, "common_url":0}):
+        print(col)
+
+to_mongo(data, salary_min)
+
+#db.collection.drop()
