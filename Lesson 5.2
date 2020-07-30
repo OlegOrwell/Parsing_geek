@@ -1,0 +1,28 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
+import time
+chrome_options = Options()
+
+chrome_options.add_argument('start-maximized')
+
+driver = webdriver.Chrome(options=chrome_options)
+driver.get('https://mvideo.ru/')
+
+time.sleep(3)
+goods = driver.find_elements_by_xpath(".//div[@class='accessories-carousel-wrapper'][2]//li[@class='gallery-list-item height-ready']")
+time.sleep(3)
+listing=[]
+for good in goods:
+    name = good.find_element_by_xpath("//a[@class='sel-product-tile-title']/@href")
+    listing.append(name)
+print(listing)
+# driver.close()
+time.sleep(3)
+#next = driver.find_element_by_xpath("//a[@class='next-btn sel-hits-button-next'][1]")
+#button = driver.find_element_by_class("next-btn sel-hits-button-next")
+button = driver.find_element_by_xpath(".//div[@class='accessories-carousel-wrapper'][2]//a[@class='sel-product-tile-title']")
+actions = ActionChains(driver)
+actions.move_to_element(button).perform()
