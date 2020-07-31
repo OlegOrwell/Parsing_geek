@@ -1,0 +1,62 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
+from pymongo import MongoClient
+import json
+import time
+chrome_options = Options()
+
+chrome_options.add_argument('start-maximized')
+
+driver = webdriver.Chrome(options=chrome_options)
+driver.get('https://mvideo.ru/')
+
+time.sleep(8)
+
+listing = []
+goods_layer = driver.find_element_by_xpath("//body[@class='home']/div[@class='wrapper']/div[@class='page-content']/div[@class='main-holder sel-main-holder']/div[8]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]")
+
+i = 0
+while i<4:
+    goods = driver.find_elements_by_xpath("//div[8]//div[1]//div[2]//div[1]//div[1]//div[1]//div[1]//ul[1]//li")
+    for good in goods:
+        small_list = {}
+
+        small_list["content"] = good.find_element_by_class_name("sel-product-tile-title").get_attribute(
+            "data-product-info")
+        small_list["url"] = good.find_element_by_class_name("sel-product-tile-title").get_attribute("href")
+        listing.append(small_list)
+        print(small_list)
+    button = driver.find_element_by_xpath("//div[8]//div[1]//div[2]//div[1]//div[1]//div[1]//div[1]//a[2]")
+    button.click()
+    time.sleep(2)
+    i += 1
+
+
+
+
+def new_data_to_mongo(listing):
+    client = MongoClient('127.0.0.1', 27017)
+    db = client["mvideo_db"]
+    collection = db.collection
+
+    for dat in listing:
+        a = dict(dat).get("url")
+        p = 0
+        for n in collection.find({"url": a}):
+            p = 1
+        if p !=1:
+            collection.insert_one(dat)
+        else:
+            continue
+
+    l = 0
+    for col in collection.find({}):
+        print(col)
+        l += 1
+    print(l)
+    db.collection.drop()
+
+new_data_to_mongo(listing)
